@@ -1,9 +1,47 @@
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
+
 public class MemoryCardGame {
+    public class Card {
+        String name;
+        int value;
+        ImageIcon icon;
+
+        public Card(String name, int value, ImageIcon icon) {
+            this.name = name;
+            this.value = value;
+            this.icon = icon;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public void setValue(int value) {
+            this.value = value;
+        }
+
+        public ImageIcon getIcon() {
+            return icon;
+        }
+
+        public void setIcon(ImageIcon icon) {
+            this.icon = icon;
+        }
+    }
+
 
     public static void shuffleCards (String[] varCards, String[][] varBoard, int varMax) {
         ArrayList <String> tmpAllCards = new ArrayList<String>();
@@ -44,48 +82,29 @@ public class MemoryCardGame {
         }
     }
 
-    public static void printBoard(String varBoard[][], int varMax) {
+    public static void printBoard(String varBoard[][]) {
+        // print out board status
+        for (String[] str : varBoard)
+            System.out.println(Arrays.toString(str));
 
-        for (int i = 0; i < varMax; i++ ) {
-            for (int j = 0; j < varMax; j++)
-                System.out.printf("*******************");
-            System.out.println("");
-
-            for (int j = 0; j < varMax; j++)
-                System.out.printf("**%15s**", " ");
-            System.out.println("");
-
-            for (int j = 0; j < varMax; j++) {
-                System.out.printf("**[%d][%d]:%7s **", i, j, varBoard[i][j]);
-            }
-            System.out.println("");
-
-            for (int j = 0; j < varMax; j++)
-                System.out.printf("**%15s**", " ");
-            System.out.println("");
-
-            for (int j = 0; j < varMax; j++)
-                System.out.printf("*******************");
-            System.out.println("");
-
-        }
     }
 
-    public static String selectCard(Scanner valKB, String[][] valBoard) {
+    public static String selectCard(Scanner valKB, String[][] valBoard,
+                                     String[][]usrBoard, int[] position) {
         int rowVal, colVal;
         String cardVal;
 
-        System.out.println("Enter row number (0 - 3) for a card");
+        System.out.println("Enter a row number (0 - 3) for a card");
         rowVal = valKB.nextInt();
 
-        System.out.println("Enter column number (0 - 3) for a card");
+        System.out.println("Enter a column number (0 - 3) for a card");
         colVal = valKB.nextInt();
 
-        System.out.println("selectCard: rowVal="+rowVal);
-        System.out.println("selectCard: colVal="+colVal);
-
         cardVal = valBoard[rowVal][colVal];
-        System.out.println("selectCard: cardVal="+cardVal);
+
+        usrBoard[rowVal][colVal] = cardVal;
+        position[0] = rowVal;
+        position[1] = colVal;
 
         return(cardVal);
     }
@@ -105,29 +124,41 @@ public class MemoryCardGame {
             for (int j = 0; j < 4; j++)
                 userBoard[i][j] = "?";
 
-
-        // print out user board status
-        for (int i = 0; i < 4; i++)
-            System.out.println(Arrays.toString(matchBoard[i]));
-
         shuffleCards(cards, answerBoard, 4);
-        //printBoard(answerBoard, 4);
+
+    printBoard(answerBoard);
 
         // print out user board status
-        for (int i = 0; i < 4; i++)
-            System.out.println(Arrays.toString(answerBoard[i]));
+        printBoard(userBoard);
 
         String cardVal1, cardVal2;
-        int rowVal, colVal;
+        int[] cardPos1 = {-1, -1};
+        int[] cardPos2 = {-1, -1};
+        int found = 0;
+
         Scanner keyboard = new Scanner(System.in);
-        cardVal1 = selectCard(keyboard, answerBoard);
 
-        System.out.println("main: cardVal1="+cardVal1);
+        while (found < 8) {
+            cardVal1 = selectCard(keyboard, answerBoard, userBoard, cardPos1);
+            printBoard(userBoard);
 
-        cardVal2 = selectCard(keyboard, answerBoard);
+            cardVal2 = selectCard(keyboard, answerBoard, userBoard, cardPos2);
+            printBoard(userBoard);
 
-        System.out.println("carVal1=" + cardVal1);
-        System.out.println("carVal2=" + cardVal2);
+            if (!cardVal1.equals(cardVal2)) {
+                // cards do not match
+                userBoard[cardPos1[0]][cardPos1[1]] = "?";
+                userBoard[cardPos2[0]][cardPos2[1]] = "?";
+                System.out.println("No match.  Try again.\n");
+                printBoard(userBoard);
+            } else
+                found++;
+
+    System.out.println("*** found " + found);
+    printBoard(answerBoard);
+
+        }
+
     }
 
 }
